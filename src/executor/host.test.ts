@@ -53,10 +53,8 @@ const cleanupFixture = (fixture: Fixture): void => {
 const withFixture = <A, E, R>(
   run: (fixture: Fixture) => Effect.Effect<A, E, R>,
 ): Effect.Effect<A, E, R> =>
-  Effect.acquireUseRelease(
-    Effect.sync(makeFixture),
-    run,
-    (fixture) => Effect.sync(() => cleanupFixture(fixture)),
+  Effect.acquireUseRelease(Effect.sync(makeFixture), run, (fixture) =>
+    Effect.sync(() => cleanupFixture(fixture)),
   );
 
 const silenceExpectedDuplicateWarning = <A, E, R>(
@@ -172,9 +170,7 @@ describe.sequential("Executor host contract", () => {
           const packageNames = loaded.plugins.map((plugin) => plugin.packageName ?? plugin.id);
 
           expect(packageNames).toContain("@pi-executor-fixture/dynamic");
-          expect(packageNames.filter((name) => name === "@executor-js/plugin-mcp")).toHaveLength(
-            1,
-          );
+          expect(packageNames.filter((name) => name === "@executor-js/plugin-mcp")).toHaveLength(1);
           expect(packageNames.some((name) => String(name).includes("onepassword"))).toBe(false);
         }),
       ),
