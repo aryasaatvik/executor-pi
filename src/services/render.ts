@@ -4,8 +4,9 @@ import { Context, Effect, Layer } from "effect";
 
 import type { ExecuteDetails, ExecuteInput } from "../schemas/execute.ts";
 import type { SearchDetails, SearchInput } from "../schemas/search.ts";
+import type { RenderSettings } from "../schemas/settings.ts";
+import { ConfigService } from "./config.ts";
 
-const maxPreviewChars = 4_000;
 const maxSearchSnippetChars = 120;
 const maxCollapsedOutputChars = 1_200;
 
@@ -20,17 +21,23 @@ const stringify = (value: unknown): string => {
   }
 };
 
-const truncate = (value: string, limit = maxPreviewChars): string =>
+const truncate = (value: string, limit: number): string =>
   value.length <= limit ? value : `${value.slice(0, limit)}\n... truncated`;
 
-const normalizeWhitespace = (value: string): string => value.replace(/\s+/g, " ").trim();
+const truncateLines = (value: string, limit: number): string => {
+  const lines = value.split("\n");
+  if (lines.length <= limit) return value;
+  return [...lines.slice(0, limit), `... truncated ${lines.length - limit} line(s)`].join("\n");
+};
+
+const collapseWhitespace = (value: string): string => value.replace(/\s+/g, " ").trim();
 
 const firstParagraph = (value: string): string =>
   value.split(/\n\s*\n/).find((part) => part.trim()) ?? value;
 
 const truncateLine = (value: string, limit: number): string => {
-  const normalized = normalizeWhitespace(value);
-  return normalized.length <= limit ? normalized : `${normalized.slice(0, limit - 1)}…`;
+  const collapsed = collapseWhitespace(value);
+  return collapsed.length <= limit ? collapsed : `${collapsed.slice(0, limit - 1)}…`;
 };
 
 const indentedLines = (value: string, theme: Theme, prefix = "  "): string[] =>
@@ -81,11 +88,14 @@ const formatExecuteOutput = (
   value: unknown,
   options: { readonly expanded?: boolean },
   theme: Theme,
+  settings: RenderSettings,
 ): string[] => {
   const formatted = stringify(value);
   const truncated = truncate(
     formatted,
-    options.expanded ? maxPreviewChars : maxCollapsedOutputChars,
+    options.expanded
+      ? settings.maxJsonBytes
+      : Math.min(settings.maxJsonBytes, maxCollapsedOutputChars),
   );
 
   return highlightJson(truncated).map((line) => theme.fg("toolOutput", line));
@@ -95,13 +105,15 @@ const formatExecuteLogs = (
   logs: readonly string[],
   options: { readonly expanded?: boolean },
   theme: Theme,
+  settings: RenderSettings,
 ): string[] => {
   if (logs.length === 0) {
     return [theme.fg("dim", "Logs: none")];
   }
 
   const logLines = logs.flatMap((entry) => entry.split("\n"));
-  const visibleLogs = options.expanded ? logLines : logLines.slice(0, 6);
+  const visibleLimit = options.expanded ? settings.maxLogLines : Math.min(settings.maxLogLines, 6);
+  const visibleLogs = logLines.slice(0, visibleLimit);
   const remaining = logLines.length - visibleLogs.length;
 
   return [
@@ -111,23 +123,31 @@ const formatExecuteLogs = (
   ];
 };
 
-export const renderExecuteCall = (args: ExecuteInput, theme: Theme): Text => {
-  const highlighted = highlightCode(args.code.trim(), "typescript");
+const renderExecuteCallWithSettings = (
+  args: ExecuteInput,
+  theme: Theme,
+  settings: RenderSettings,
+): Text => {
+  const highlighted = highlightCode(
+    truncateLines(args.code.trim(), settings.maxCodePreviewLines),
+    "typescript",
+  );
   return new Text([sectionLabel("Code", theme), ...highlighted].join("\n"), 0, 0);
 };
 
-export const renderExecuteResult = (
+const renderExecuteResultWithSettings = (
   details: ExecuteDetails | undefined,
   contentText: string,
   options: { readonly expanded?: boolean; readonly isPartial?: boolean },
   theme: Theme,
+  settings: RenderSettings,
 ): Text => {
   if (options.isPartial) {
     return new Text(theme.fg("warning", "running..."), 0, 0);
   }
 
   if (!details) {
-    return new Text(truncate(contentText), 0, 0);
+    return new Text(truncate(contentText, settings.maxJsonBytes), 0, 0);
   }
 
   if (details.status === "error") {
@@ -135,22 +155,22 @@ export const renderExecuteResult = (
       theme.fg("error", theme.bold("failed")),
       theme.fg("error", details.error),
       "",
-      ...formatExecuteLogs(details.logs, options, theme),
+      ...formatExecuteLogs(details.logs, options, theme, settings),
     ];
     return new Text(lines.join("\n"), 0, 0);
   }
 
   const lines = [
     sectionLabel("Output", theme),
-    ...formatExecuteOutput(details.result, options, theme),
+    ...formatExecuteOutput(details.result, options, theme, settings),
     "",
-    ...formatExecuteLogs(details.logs, options, theme),
+    ...formatExecuteLogs(details.logs, options, theme, settings),
   ];
 
   return new Text(lines.join("\n"), 0, 0);
 };
 
-export const renderSearchCall = (args: SearchInput, theme: Theme): Text => {
+const renderSearchCallWithSettings = (args: SearchInput, theme: Theme): Text => {
   const suffix = [
     args.namespace ? `namespace=${args.namespace}` : undefined,
     args.limit ? `limit=${args.limit}` : undefined,
@@ -168,18 +188,19 @@ export const renderSearchCall = (args: SearchInput, theme: Theme): Text => {
   return new Text(lines.join("\n"), 0, 0);
 };
 
-export const renderSearchResult = (
+const renderSearchResultWithSettings = (
   details: SearchDetails | undefined,
   contentText: string,
   options: { readonly expanded?: boolean; readonly isPartial?: boolean },
   theme: Theme,
+  settings: RenderSettings,
 ): Text => {
   if (options.isPartial) {
     return new Text(theme.fg("warning", "Search running..."), 0, 0);
   }
 
   if (!details) {
-    return new Text(truncate(contentText), 0, 0);
+    return new Text(truncate(contentText, settings.maxJsonBytes), 0, 0);
   }
 
   const lines = [
@@ -213,15 +234,58 @@ export const renderSearchResult = (
 export class RenderService extends Context.Service<
   RenderService,
   {
-    readonly summarize: (value: unknown) => Effect.Effect<string>;
-    readonly formatJson: (value: unknown) => Effect.Effect<string>;
+    readonly renderExecuteCall: (
+      cwd: string,
+      args: ExecuteInput,
+      theme: Theme,
+    ) => Effect.Effect<Text>;
+    readonly renderExecuteResult: (
+      cwd: string,
+      details: ExecuteDetails | undefined,
+      contentText: string,
+      options: { readonly expanded?: boolean; readonly isPartial?: boolean },
+      theme: Theme,
+    ) => Effect.Effect<Text>;
+    readonly renderSearchCall: (
+      cwd: string,
+      args: SearchInput,
+      theme: Theme,
+    ) => Effect.Effect<Text>;
+    readonly renderSearchResult: (
+      cwd: string,
+      details: SearchDetails | undefined,
+      contentText: string,
+      options: { readonly expanded?: boolean; readonly isPartial?: boolean },
+      theme: Theme,
+    ) => Effect.Effect<Text>;
   }
 >()("RenderService") {
-  static readonly Default = Layer.succeed(this)({
-    summarize: (value) =>
-      Effect.sync(() => {
-        return truncate(stringify(value));
-      }),
-    formatJson: (value) => Effect.sync(() => stringify(value)),
-  });
+  static readonly Default = Layer.effect(this)(
+    Effect.gen(function* () {
+      const config = yield* ConfigService;
+      const renderSettings = (cwd: string) =>
+        config.resolve(cwd).pipe(Effect.map((resolved) => resolved.settings.render));
+
+      return {
+        renderExecuteCall: (cwd, args, theme) =>
+          renderSettings(cwd).pipe(
+            Effect.map((settings) => renderExecuteCallWithSettings(args, theme, settings)),
+          ),
+        renderExecuteResult: (cwd, details, contentText, options, theme) =>
+          renderSettings(cwd).pipe(
+            Effect.map((settings) =>
+              renderExecuteResultWithSettings(details, contentText, options, theme, settings),
+            ),
+          ),
+        renderSearchCall: (_cwd, args, theme) =>
+          Effect.succeed(renderSearchCallWithSettings(args, theme)),
+        renderSearchResult: (cwd, details, contentText, options, theme) =>
+          renderSettings(cwd).pipe(
+            Effect.map((settings) =>
+              renderSearchResultWithSettings(details, contentText, options, theme, settings),
+            ),
+          ),
+      };
+    }),
+  );
 }
