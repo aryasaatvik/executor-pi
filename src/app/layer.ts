@@ -18,7 +18,7 @@ export type AppServices =
   | RenderService
   | SessionStateService;
 
-export const makeAppLayer = (_pi: ExtensionAPI): Layer.Layer<AppServices> =>
+export const makeAppLayer = (pi: ExtensionAPI): Layer.Layer<AppServices> =>
   Layer.mergeAll(
     ConfigService.Default,
     ElicitationUiService.Default,
