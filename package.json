@@ -7,6 +7,15 @@
     "pi-extension",
     "pi-package"
   ],
+  "homepage": "https://github.com/aryasaatvik/executor-pi#readme",
+  "bugs": {
+    "url": "https://github.com/aryasaatvik/executor-pi/issues"
+  },
+  "author": "Saatvik Arya <aryasaatvik@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aryasaatvik/executor-pi.git"
+  },
   "type": "module",
   "scripts": {
     "prepare": "effect-language-service patch && effect-tsgo patch",
