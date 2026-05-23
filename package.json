@@ -16,6 +16,11 @@
     "type": "git",
     "url": "git+https://github.com/aryasaatvik/executor-pi.git"
   },
+  "files": [
+    "docs",
+    "src",
+    "vendor"
+  ],
   "type": "module",
   "scripts": {
     "prepare": "effect-language-service patch && effect-tsgo patch",
@@ -43,7 +48,7 @@
     "better-sqlite3": "^12.10.0",
     "drizzle-orm": "^0.45.0",
     "effect": "4.0.0-beta.59",
-    "fumadb": "file:.local-packages/fumadb-0.3.0-382dcd65.tgz",
+    "fumadb": "file:./vendor/fumadb-0.3.0-382dcd65.tgz",
     "oxc-parser": "^0.132.0"
   },
   "devDependencies": {
@@ -70,7 +75,7 @@
     "typebox": "*"
   },
   "overrides": {
-    "fumadb": "file:.local-packages/fumadb-0.3.0-382dcd65.tgz"
+    "fumadb": "file:./vendor/fumadb-0.3.0-382dcd65.tgz"
   },
   "pi": {
     "extensions": [
