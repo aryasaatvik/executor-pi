@@ -4,17 +4,6 @@ import { Context, Effect, Layer, Predicate } from "effect";
 
 import { ElicitationUiError } from "../errors.ts";
 
-const formatArgs = (args: unknown): string => {
-  if (typeof args === "string") return args;
-  if (args === undefined) return "(no args)";
-
-  try {
-    return JSON.stringify(args, null, 2) ?? "null";
-  } catch {
-    return String(args);
-  }
-};
-
 const formatJson = (value: unknown): string => {
   try {
     return JSON.stringify(value, null, 2) ?? "null";
@@ -78,10 +67,7 @@ export class ElicitationUiService extends Context.Service<
 
           if (Predicate.isTagged(req, "FormElicitation")) {
             if (!hasFormFields(req.requestedSchema)) {
-              const ok = await ctx.ui.confirm(
-                req.message,
-                `Tool: ${String(elicitation.toolId)}\n\nArgs:\n${formatArgs(elicitation.args)}`,
-              );
+              const ok = await ctx.ui.confirm(req.message, `Tool: ${String(elicitation.toolId)}`);
               return { action: ok ? "accept" : "decline" };
             }
 
