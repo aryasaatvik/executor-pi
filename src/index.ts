@@ -1,13 +1,18 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { Effect } from "effect";
 
 import { executorStatusCommand } from "./commands/executor.ts";
 import { makeRuntime } from "./app/runtime.ts";
+import { ExecutorHostService } from "./services/executor-host.ts";
+import { makeExecuteTool } from "./tools/execute.ts";
 
 export default function piExecutor(pi: ExtensionAPI): void {
   const runtime = makeRuntime(pi);
 
+  pi.registerTool(makeExecuteTool(runtime));
+
   pi.registerCommand("executor", {
-    description: "Show pi-executor extension status",
+    description: "Inspect and manage the pi-executor extension",
     handler: async (args, ctx) => {
       const status = await runtime.runPromise(executorStatusCommand(args, ctx));
 
@@ -17,6 +22,9 @@ export default function piExecutor(pi: ExtensionAPI): void {
   });
 
   pi.on("session_shutdown", async () => {
+    await runtime.runPromise(
+      Effect.flatMap(ExecutorHostService.asEffect(), (hosts) => hosts.closeAll),
+    );
     await runtime.dispose();
   });
 }
