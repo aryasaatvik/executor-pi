@@ -1,6 +1,6 @@
 # Local FumaDB Package
 
-`pi-executor` uses a local `fumadb` tarball generated from
+`executor-pi` uses a local `fumadb` tarball generated from
 `~/Developer/executor/packages/core/fumadb`.
 
 This is a package/export workaround, not a host ownership workaround. The Pi

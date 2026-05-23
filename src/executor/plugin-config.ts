@@ -44,7 +44,7 @@ export const loadExecutorPlugins = (
       const dedupedDynamic = dynamicPlugins.filter((plugin) => {
         if (plugin.packageName && staticPackageNames.has(plugin.packageName)) {
           console.warn(
-            `[pi-executor] plugin "${plugin.packageName}" appears in both static config and executor.jsonc#plugins. The static entry wins.`,
+            `[executor-pi] plugin "${plugin.packageName}" appears in both static config and executor.jsonc#plugins. The static entry wins.`,
           );
           return false;
         }

@@ -12,11 +12,11 @@ export class LoggerService extends Context.Service<
   static readonly Default = Layer.succeed(this)({
     debug: (event, fields) =>
       Effect.sync(() => {
-        console.debug("[pi-executor]", "debug", event, fields ?? {});
+        console.debug("[executor-pi]", "debug", event, fields ?? {});
       }),
     info: (event, fields) =>
       Effect.sync(() => {
-        console.info("[pi-executor]", "info", event, fields ?? {});
+        console.info("[executor-pi]", "info", event, fields ?? {});
       }),
   });
 }

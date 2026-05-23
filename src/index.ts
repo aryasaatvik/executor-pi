@@ -5,14 +5,16 @@ import { executorStatusCommand } from "./commands/executor.ts";
 import { makeRuntime } from "./app/runtime.ts";
 import { ExecutorHostService } from "./services/executor-host.ts";
 import { makeExecuteTool } from "./tools/execute.ts";
+import { makeSearchTool } from "./tools/search.ts";
 
 export default function piExecutor(pi: ExtensionAPI): void {
   const runtime = makeRuntime(pi);
 
+  pi.registerTool(makeSearchTool(runtime));
   pi.registerTool(makeExecuteTool(runtime));
 
   pi.registerCommand("executor", {
-    description: "Inspect and manage the pi-executor extension",
+    description: "Inspect and manage the executor-pi extension",
     handler: async (args, ctx) => {
       const status = await runtime.runPromise(executorStatusCommand(args, ctx));
 

@@ -1,6 +1,6 @@
-# pi-executor
+# executor-pi
 
-`pi-executor` is a first-class Pi extension for running Executor from inside Pi
+`executor-pi` is a first-class Pi extension for running Executor from inside Pi
 with native approval, elicitation, rendering, and project-aware Executor
 configuration.
 
@@ -14,7 +14,7 @@ plugins, and execution semantics.
 
 - Run Executor TypeScript snippets directly from Pi.
 - Use Executor SDK semantics instead of shelling out to a daemon.
-- Keep one primary `execute` tool instead of exposing many low-level tools.
+- Keep two primary tools: `search` for discovery and `execute` for execution.
 - Use the active project cwd as the Executor scope.
 
 ### Local Executor Config Semantics
@@ -36,6 +36,7 @@ plugins, and execution semantics.
 ### Rich Rendering
 
 - Syntax-highlight Executor code before execution.
+- Render Executor search results with paths, descriptions, and pagination hints.
 - Render structured JSON cleanly.
 - Separate summaries, logs, errors, and outputs.
 - Show paused or elicitation states clearly.
@@ -45,7 +46,8 @@ plugins, and execution semantics.
 
 - Provide `/executor` status and diagnostics.
 - Add focused settings and help commands for Executor workflows.
-- Include Executor usage guidance for writing good Executor code from Pi.
+- Include Executor usage guidance directly in the `search` and `execute` tool
+  prompts.
 - Avoid generic MCP search, describe, and invoke tool sprawl.
 
 ## Architecture
@@ -53,7 +55,7 @@ plugins, and execution semantics.
 ```mermaid
 flowchart TB
   Pi["Pi ExtensionAPI"] --> Runtime["Effect ManagedRuntime"]
-  Runtime --> Tools["Pi execute tool"]
+  Runtime --> Tools["Pi search + execute tools"]
   Runtime --> Commands["/executor commands"]
   Runtime --> UX["Pi elicitation UI"]
   Runtime --> Host["ExecutorHostService"]
@@ -77,10 +79,15 @@ Install the extension into Pi, then use the Executor tool from a project with
 the desired `executor.jsonc` configuration.
 
 ```ts
-await tools.executor.execute({
+await tools.search({
+  query: "github issues",
+  includeDetails: true,
+});
+
+await tools.execute({
   code: `
-    const tools = await executor.tools.list();
-    return tools.map((tool) => tool.name);
+    const { items } = await tools.search({ query: "github issues", limit: 5 });
+    return items;
   `,
 });
 ```
@@ -90,7 +97,7 @@ configuration, and available diagnostics.
 
 ## Configuration
 
-`pi-executor` follows Executor's local project configuration model:
+`executor-pi` follows Executor's local project configuration model:
 
 - Project config: `executor.jsonc` in the active project.
 - Storage: local Executor storage under `~/.executor`.
@@ -110,6 +117,9 @@ bun install
 bun run typecheck
 bun run lint
 bun run format:check
+bun run test
+bun run verify:host
+bun run check
 ```
 
 Formatting:
@@ -123,6 +133,11 @@ package.
 
 Effect services use `Context.Service`, `Layer`, scoped resources, and typed
 errors. Pi callbacks are thin Promise adapters around the Effect runtime.
+
+Host contract and local package notes live in:
+
+- `docs/executor-host.md`
+- `docs/local-fumadb.md`
 
 ## Non-Goals
 
