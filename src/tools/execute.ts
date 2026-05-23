@@ -18,17 +18,21 @@ export const makeExecuteTool = (
   runtime: ManagedRuntime.ManagedRuntime<AppServices, never>,
 ): ToolDefinition<typeof ExecuteInput, ExecuteDetails> =>
   defineTool({
-    name: "executor_execute",
+    name: "executor",
     label: "Executor",
     description:
-      "Execute Executor TypeScript code against tools configured for the current project.",
-    promptSnippet: "Run Executor TypeScript code with access to configured API tools.",
+      "Execute TypeScript in Executor's sandbox for the current project, with access to configured Executor tools, sources, secrets, policies, and Pi-native elicitation. Use search first when you need to discover tool paths or input shapes.",
+    promptSnippet: "Run Executor TypeScript against configured project tools.",
     parameters: Type.Object({
       code: ExecuteInput.properties.code,
     }),
     promptGuidelines: [
-      "Use executor_execute for Executor TypeScript snippets that need configured Executor tools, sources, secrets, or policies.",
+      "Use executor for Executor TypeScript snippets that need configured Executor tools, sources, secrets, or policies.",
+      "Use search first when the Executor tool path or input shape is unknown.",
+      "Inside executor code, use tools.search({ query, limit }) and tools.describe.tool({ path }) for sandbox-local discovery.",
+      "Inside Executor code, call tools by full namespace path, such as tools.github.getRepositoryDetails(input).",
       "Keep snippets focused and return structured JSON when the result will be inspected by Pi.",
+      "Do not use fetch; use configured Executor tools.",
     ],
     async execute(toolCallId, params, signal, onUpdate, ctx: ExtensionContext) {
       try {

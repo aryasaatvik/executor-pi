@@ -19,7 +19,7 @@ interface Fixture {
 const fixtures = new Set<Fixture>();
 
 const makeFixture = (): Fixture => {
-  const workspace = mkdtempSync(join(tmpdir(), "pi-executor-host-test-"));
+  const workspace = mkdtempSync(join(tmpdir(), "executor-pi-host-test-"));
   const projectDir = join(workspace, "project");
   const dataDir = join(workspace, "data");
   const previousDataDir = process.env.EXECUTOR_DATA_DIR;
@@ -88,7 +88,7 @@ const writeFixturePackage = (
   packageName: string,
   pluginPackageName = packageName,
 ): void => {
-  const packageDir = join(root, "node_modules", "@pi-executor-fixture", name);
+  const packageDir = join(root, "node_modules", "@executor-pi-fixture", name);
   mkdirSync(packageDir, { recursive: true });
   writeFileSync(
     join(packageDir, "package.json"),
@@ -122,13 +122,13 @@ const writeProjectConfig = (fixture: Fixture): void => {
   writeFixturePackage(
     fixture.projectDir,
     "dynamic",
-    "@pi-executor-fixture/dynamic",
-    "@pi-executor-fixture/dynamic",
+    "@executor-pi-fixture/dynamic",
+    "@executor-pi-fixture/dynamic",
   );
   writeFixturePackage(
     fixture.projectDir,
     "mcp-shadow",
-    "@pi-executor-fixture/mcp-shadow",
+    "@executor-pi-fixture/mcp-shadow",
     "@executor-js/plugin-mcp",
   );
   writeFileSync(
@@ -136,8 +136,8 @@ const writeProjectConfig = (fixture: Fixture): void => {
     JSON.stringify(
       {
         plugins: [
-          { package: "@pi-executor-fixture/dynamic" },
-          { package: "@pi-executor-fixture/mcp-shadow" },
+          { package: "@executor-pi-fixture/dynamic" },
+          { package: "@executor-pi-fixture/mcp-shadow" },
         ],
       },
       null,
@@ -169,7 +169,7 @@ describe.sequential("Executor host contract", () => {
           const loaded = yield* loadExecutorPlugins(fixture.projectDir);
           const packageNames = loaded.plugins.map((plugin) => plugin.packageName ?? plugin.id);
 
-          expect(packageNames).toContain("@pi-executor-fixture/dynamic");
+          expect(packageNames).toContain("@executor-pi-fixture/dynamic");
           expect(packageNames.filter((name) => name === "@executor-js/plugin-mcp")).toHaveLength(1);
           expect(packageNames.some((name) => String(name).includes("onepassword"))).toBe(false);
         }),
