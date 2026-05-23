@@ -57,7 +57,7 @@ try {
   const fumadbDependency = repoPackage.dependencies.fumadb;
 
   assert(
-    /^file:\.local-packages\/fumadb-\d+\.\d+\.\d+-[0-9a-f]+\.tgz$/.test(fumadbDependency),
+    /^file:\.\/vendor\/fumadb-\d+\.\d+\.\d+-[0-9a-f]+\.tgz$/.test(fumadbDependency),
     "fumadb dependency must point at a short-SHA local tarball",
   );
   assert(

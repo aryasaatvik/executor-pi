@@ -47,7 +47,7 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoDir = resolve(scriptDir, "..");
 const executorFumadbDir =
   process.env.EXECUTOR_FUMADB_DIR ?? resolve(repoDir, "../executor/packages/core/fumadb");
-const localPackagesDir = join(repoDir, ".local-packages");
+const vendorDir = join(repoDir, "vendor");
 const repoPackagePath = join(repoDir, "package.json");
 
 const run = (
@@ -127,17 +127,17 @@ try {
 
   writeJson(packedPackagePath, sanitizedPackage);
 
-  mkdirSync(localPackagesDir, { recursive: true });
-  for (const entry of readdirSync(localPackagesDir)) {
+  mkdirSync(vendorDir, { recursive: true });
+  for (const entry of readdirSync(vendorDir)) {
     const isPackedFumadb =
       entry === bunPackedFileName ||
       (entry.startsWith(`fumadb-${sourcePackage.version}-`) && entry.endsWith(".tgz"));
     if (isPackedFumadb) {
-      rmSync(join(localPackagesDir, entry), { force: true });
+      rmSync(join(vendorDir, entry), { force: true });
     }
   }
 
-  const outputTarballPath = join(localPackagesDir, outputFileName);
+  const outputTarballPath = join(vendorDir, outputFileName);
   rmSync(outputTarballPath, { force: true });
   run("tar", ["-czf", outputTarballPath, "-C", tempDir, "package"], { cwd: repoDir });
 
@@ -157,7 +157,7 @@ try {
   }
 
   const repoPackage = readJson<PiPackage>(repoPackagePath);
-  const tarballDependency = `file:.local-packages/${outputFileName}`;
+  const tarballDependency = `file:./vendor/${outputFileName}`;
   repoPackage.dependencies.fumadb = tarballDependency;
   repoPackage.overrides.fumadb = tarballDependency;
   writeJson(repoPackagePath, repoPackage);
