@@ -5,7 +5,6 @@ import { Effect, Result } from "effect";
 import { formatErrorWithCauses } from "../errors.ts";
 import { ConfigService } from "../services/config.ts";
 import { ExecutorHostService, type ExecutorHost } from "../services/executor-host.ts";
-import { logDebug } from "../services/logger.ts";
 import { SessionStateService } from "../services/session-state.ts";
 
 export interface ExecutorStatus {
@@ -84,12 +83,14 @@ export const executorStatusCommand = (
     const snapshot = yield* sessionState.snapshot(ctx);
     const command = args.trim().split(/\s+/, 1)[0]?.toLowerCase() || "status";
 
-    yield* logDebug("executor.status", {
-      args: command,
-      cwd: resolved.cwd,
-      hasUI: snapshot.hasUI,
-      model: snapshot.model,
-    });
+    yield* Effect.logDebug("executor.status").pipe(
+      Effect.annotateLogs({
+        args: command,
+        cwd: resolved.cwd,
+        hasUI: snapshot.hasUI,
+        model: snapshot.model,
+      }),
+    );
 
     if (command === "help") {
       return {

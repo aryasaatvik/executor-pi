@@ -21,7 +21,6 @@ export type AppServices =
 
 export const makeAppLayer = (pi: ExtensionAPI): Layer.Layer<AppServices> =>
   Layer.mergeAll(
-    ConfigService.Default,
     ElicitationUiService.Default,
     ExecutionService.Default,
     ExecutorHostService.Default,
@@ -29,4 +28,4 @@ export const makeAppLayer = (pi: ExtensionAPI): Layer.Layer<AppServices> =>
     SearchService.Default,
     SessionStateService.Default,
     ExecutorPiLoggerLayer,
-  );
+  ).pipe(Layer.provideMerge(ConfigService.Default));

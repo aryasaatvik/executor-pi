@@ -3,8 +3,6 @@ import { dirname, join } from "node:path";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { Effect, Layer, Logger, References } from "effect";
 
-export type LogFields = Record<string, unknown>;
-
 const logPath = join(getAgentDir(), "executor-pi.log");
 
 const namespaceMatches = (pattern: string, namespace: string): boolean => {
@@ -41,7 +39,7 @@ export const isDebugNamespaceEnabled = (
 const isDebugEnabled = (namespace = "executor-pi"): boolean =>
   isDebugNamespaceEnabled(process.env.DEBUG, namespace);
 
-const writeLog = (level: string, event: string, fields?: LogFields): void => {
+const writeLog = (level: string, event: string, fields: Record<string, unknown>): void => {
   mkdirSync(dirname(logPath), { recursive: true });
   appendFileSync(
     logPath,
@@ -50,23 +48,17 @@ const writeLog = (level: string, event: string, fields?: LogFields): void => {
       level,
       namespace: "executor-pi",
       event,
-      fields: fields ?? {},
+      fields,
     })}\n`,
   );
 };
 
-const normalizeMessage = (message: unknown): string =>
+const logMessageText = (message: unknown): string =>
   Array.isArray(message) ? message.map((part) => String(part)).join(" ") : String(message);
-
-export const logDebug = (event: string, fields?: LogFields): Effect.Effect<void> =>
-  Effect.logDebug(event).pipe(Effect.annotateLogs(fields ?? {}));
-
-export const logInfo = (event: string, fields?: LogFields): Effect.Effect<void> =>
-  Effect.logInfo(event).pipe(Effect.annotateLogs(fields ?? {}));
 
 export const ExecutorPiLogger = Logger.make<unknown, void>((options) => {
   const annotations = options.fiber.getRef(References.CurrentLogAnnotations);
-  const message = normalizeMessage(options.message);
+  const message = logMessageText(options.message);
 
   writeLog(options.logLevel.toLowerCase(), message, annotations);
 });

@@ -10,7 +10,9 @@ export interface SessionSnapshot {
 export class SessionStateService extends Context.Service<
   SessionStateService,
   {
-    readonly snapshot: (ctx: ExtensionContext) => Effect.Effect<SessionSnapshot>;
+    readonly snapshot: (
+      ctx: Pick<ExtensionContext, "cwd" | "hasUI" | "model">,
+    ) => Effect.Effect<SessionSnapshot>;
   }
 >()("SessionStateService") {
   static readonly Default = Layer.succeed(this)({
