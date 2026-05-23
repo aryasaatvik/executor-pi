@@ -21,7 +21,7 @@ export const makeSearchTool = (
     name: "search",
     label: "Search",
     description:
-      "Search Executor's configured tool catalog for the current project. Use this before executor when you need available namespaces, tool paths, descriptions, or compact TypeScript shapes. This does not execute external tools.",
+      "Search Executor's configured tool catalog for the current project. Use this before execute when you need available namespaces, tool paths, descriptions, or compact TypeScript shapes. This does not execute external tools.",
     promptSnippet: "Search Executor's configured project tool catalog.",
     parameters: Type.Object({
       query: SearchInput.properties.query,
@@ -31,7 +31,7 @@ export const makeSearchTool = (
       includeDetails: SearchInput.properties.includeDetails,
     }),
     promptGuidelines: [
-      "Use search before executor when the Executor tool path or input shape is unknown.",
+      "Use search before execute when the Executor tool path or input shape is unknown.",
       "Use short intent phrases such as github issues, repo details, or create calendar event.",
       "Set includeDetails when you need compact TypeScript input/output shapes before writing Executor code.",
       "Search returns a paged result object with items, total, hasMore, and nextOffset; inspect items before choosing a tool path.",
