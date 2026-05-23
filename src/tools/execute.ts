@@ -9,10 +9,7 @@ import { Effect, type ManagedRuntime } from "effect";
 import { ExecuteInput, type ExecuteDetails } from "../schemas/execute.ts";
 import type { AppServices } from "../app/layer.ts";
 import { ExecutionService } from "../services/execution.ts";
-import { renderExecuteCall, renderExecuteResult } from "../services/render.ts";
-
-const formatToolError = (cause: unknown): string =>
-  cause instanceof Error ? cause.message : String(cause);
+import { RenderService } from "../services/render.ts";
 
 export const makeExecuteTool = (
   runtime: ManagedRuntime.ManagedRuntime<AppServices, never>,
@@ -52,20 +49,29 @@ export const makeExecuteTool = (
           isError: result.isError,
         };
       } catch (cause) {
+        const message = cause instanceof Error ? cause.message : String(cause);
         return {
-          content: [{ type: "text", text: formatToolError(cause) }],
-          details: { status: "error", error: formatToolError(cause), logs: [] },
+          content: [{ type: "text", text: message }],
+          details: { status: "error", error: message, logs: [] },
           isError: true,
         };
       }
     },
     renderCall(args, theme, context) {
-      return renderExecuteCall(args, theme);
+      return runtime.runSync(
+        Effect.flatMap(RenderService.asEffect(), (render) =>
+          render.renderExecuteCall(context.cwd, args, theme),
+        ),
+      );
     },
     renderResult(result, options, theme, context) {
       const content = result.content[0];
       const text = content?.type === "text" ? content.text : "";
 
-      return renderExecuteResult(result.details, text, options, theme);
+      return runtime.runSync(
+        Effect.flatMap(RenderService.asEffect(), (render) =>
+          render.renderExecuteResult(context.cwd, result.details, text, options, theme),
+        ),
+      );
     },
   });

@@ -8,11 +8,8 @@ import { Effect, type ManagedRuntime } from "effect";
 
 import type { AppServices } from "../app/layer.ts";
 import { SearchInput, type SearchDetails } from "../schemas/search.ts";
-import { renderSearchCall, renderSearchResult } from "../services/render.ts";
+import { RenderService } from "../services/render.ts";
 import { SearchService } from "../services/search.ts";
-
-const formatToolError = (cause: unknown): string =>
-  cause instanceof Error ? cause.message : String(cause);
 
 export const makeSearchTool = (
   runtime: ManagedRuntime.ManagedRuntime<AppServices, never>,
@@ -52,20 +49,29 @@ export const makeSearchTool = (
           details: result.details,
         };
       } catch (cause) {
+        const message = cause instanceof Error ? cause.message : String(cause);
         return {
-          content: [{ type: "text", text: formatToolError(cause) }],
+          content: [{ type: "text", text: message }],
           details: { items: [], total: 0, hasMore: false, nextOffset: null },
           isError: true,
         };
       }
     },
     renderCall(args, theme, context) {
-      return renderSearchCall(args, theme);
+      return runtime.runSync(
+        Effect.flatMap(RenderService.asEffect(), (render) =>
+          render.renderSearchCall(context.cwd, args, theme),
+        ),
+      );
     },
     renderResult(result, options, theme, context) {
       const content = result.content[0];
       const text = content?.type === "text" ? content.text : "";
 
-      return renderSearchResult(result.details, text, options, theme);
+      return runtime.runSync(
+        Effect.flatMap(RenderService.asEffect(), (render) =>
+          render.renderSearchResult(context.cwd, result.details, text, options, theme),
+        ),
+      );
     },
   });
