@@ -5,6 +5,7 @@ build/
 coverage/
 .turbo/
 .vite/
+.local-packages/
 *.tsbuildinfo
 
 .env
