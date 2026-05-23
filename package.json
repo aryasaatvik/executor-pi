@@ -1,0 +1,46 @@
+{
+  "name": "pi-executor",
+  "version": "0.0.0",
+  "private": true,
+  "keywords": [
+    "executor",
+    "pi-extension",
+    "pi-package"
+  ],
+  "type": "module",
+  "scripts": {
+    "prepare": "effect-language-service patch && effect-tsgo patch",
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "check": "bun run typecheck && bun run lint && bun run format:check"
+  },
+  "dependencies": {
+    "effect": "4.0.0-beta.66"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "0.75.4",
+    "@earendil-works/pi-coding-agent": "0.75.4",
+    "@earendil-works/pi-tui": "0.75.4",
+    "@effect/language-service": "^0.85.1",
+    "@effect/tsgo": "^0.5.2",
+    "@types/node": "^25.0.0",
+    "@typescript/native-preview": "7.0.0-dev.20260512.1",
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.61.0",
+    "typebox": "1.1.38",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
+    "typebox": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  }
+}
