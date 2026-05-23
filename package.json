@@ -1,7 +1,6 @@
 {
   "name": "executor-pi",
   "version": "0.1.0",
-  "private": true,
   "keywords": [
     "executor",
     "pi-extension",
@@ -23,6 +22,9 @@
     "vendor"
   ],
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "prepare": "effect-language-service patch && effect-tsgo patch",
     "deps:pack-fumadb": "bun scripts/pack-local-fumadb.ts",
