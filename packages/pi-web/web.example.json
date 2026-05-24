@@ -1,0 +1,29 @@
+{
+  "provider": "auto",
+  "caps": {
+    "defaultNumResults": 10,
+    "maxNumResults": 20,
+    "maxFetchUrls": 20,
+    "defaultFetchMaxCharacters": 3000,
+    "maxFetchMaxCharacters": 20000,
+    "allowDeepSearch": true
+  },
+  "exa": {
+    "search": {
+      "type": "auto",
+      "numResults": 10
+    },
+    "fetch": {
+      "maxCharacters": 3000
+    }
+  },
+  "parallel": {
+    "search": {
+      "mode": "advanced",
+      "maxResults": 10
+    },
+    "fetch": {
+      "maxCharacters": 3000
+    }
+  }
+}
