@@ -8,34 +8,31 @@ root-level TypeScript, lint, and format tooling.
 
 ## Packages
 
-| Package                                 | Description                                                                                                           |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| [`pi-web`](./packages/pi-web)           | `web_search` and `web_fetch` tools with a pluggable provider layer. Supports Exa and Parallel.                        |
-| [`executor-pi`](./packages/pi-executor) | Native Pi extension for Executor search, execution, elicitation, rendering, and project-aware Executor configuration. |
+| Package                                   | Description                                                                                                           |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| [`@pi-ext/web`](./packages/web)           | `web_search` and `web_fetch` tools with a pluggable provider layer. Supports Exa and Parallel.                        |
+| [`@pi-ext/executor`](./packages/executor) | Native Pi extension for Executor search, execution, elicitation, rendering, and project-aware Executor configuration. |
 
 ## Install In Pi
 
 Install one package:
 
 ```bash
-pi install /path/to/pi-extensions/packages/pi-web
-pi install /path/to/pi-extensions/packages/pi-executor
+pi install /path/to/pi-extensions/packages/web
+pi install /path/to/pi-extensions/packages/executor
 ```
 
 Or add packages to `~/.pi/agent/settings.json`:
 
 ```json
 {
-  "packages": [
-    "/path/to/pi-extensions/packages/pi-web",
-    "/path/to/pi-extensions/packages/pi-executor"
-  ]
+  "packages": ["/path/to/pi-extensions/packages/web", "/path/to/pi-extensions/packages/executor"]
 }
 ```
 
 ## Configuration
 
-### `pi-web`
+### `@pi-ext/web`
 
 Credentials are read from `~/.pi/agent/auth.json` under provider ids `exa` and/or
 `parallel`.
@@ -55,7 +52,7 @@ Credentials are read from `~/.pi/agent/auth.json` under provider ids `exa` and/o
 
 Use `/web config` in Pi for provider/default settings.
 
-### `executor-pi`
+### `@pi-ext/executor`
 
 Executor project behavior comes from `executor.jsonc` in the active project.
 Pi-specific display and render settings live in:
@@ -83,8 +80,8 @@ bun run check
 Run package-specific checks:
 
 ```bash
-bun run --filter pi-web check
-bun run --filter executor-pi check
+bun run --filter @pi-ext/web check
+bun run --filter @pi-ext/executor check
 ```
 
 Root-owned tooling:
@@ -104,6 +101,6 @@ Root [`oxlint.config.ts`](./oxlint.config.ts) and
 ## Workspace Notes
 
 - Root `bun.lock` is authoritative.
-- `packages/pi-executor` depends on a vendored `fumadb` tarball. The workspace
-  root owns the matching override so Executor SDK and the package resolve the
-  same `fumadb` instance.
+- `packages/executor` depends on a vendored `fumadb` workspace package. The
+  workspace root owns the matching override so Executor SDK and the package
+  resolve the same `fumadb` instance.
