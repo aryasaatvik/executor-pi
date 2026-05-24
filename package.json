@@ -1,88 +1,34 @@
 {
-  "name": "executor-pi",
-  "version": "0.2.0",
-  "keywords": [
-    "executor",
-    "pi-extension",
-    "pi-package"
-  ],
-  "homepage": "https://github.com/aryasaatvik/executor-pi#readme",
-  "bugs": {
-    "url": "https://github.com/aryasaatvik/executor-pi/issues"
-  },
+  "name": "pi-extensions",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Monorepo for Pi coding agent extensions",
   "license": "MIT",
-  "author": "Saatvik Arya <aryasaatvik@gmail.com>",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/aryasaatvik/executor-pi.git"
-  },
-  "files": [
-    "docs",
-    "src",
-    "vendor"
-  ],
   "type": "module",
-  "publishConfig": {
-    "access": "public"
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "prepare": "effect-language-service patch && effect-tsgo patch",
-    "deps:pack-fumadb": "bun scripts/pack-local-fumadb.ts",
-    "install:local": "bun run deps:pack-fumadb && bun install",
-    "verify:host": "node --import jiti/register scripts/verify-executor-host.ts",
-    "typecheck": "tsgo --noEmit",
-    "test": "vitest run",
-    "lint": "oxlint",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
-    "check": "bun run typecheck && bun run lint && bun run format:check && bun run test && bun run verify:host"
-  },
-  "dependencies": {
-    "@executor-js/config": "1.4.33",
-    "@executor-js/execution": "1.4.33",
-    "@executor-js/plugin-file-secrets": "1.4.33",
-    "@executor-js/plugin-google-discovery": "1.4.33",
-    "@executor-js/plugin-graphql": "1.4.33",
-    "@executor-js/plugin-keychain": "1.4.33",
-    "@executor-js/plugin-mcp": "1.4.33",
-    "@executor-js/plugin-openapi": "1.4.33",
-    "@executor-js/runtime-quickjs": "1.4.33",
-    "@executor-js/sdk": "1.4.33",
-    "better-sqlite3": "^12.10.0",
-    "drizzle-orm": "^0.45.0",
-    "effect": "4.0.0-beta.59",
-    "fumadb": "file:./vendor/fumadb-0.3.0-382dcd65.tgz",
-    "oxc-parser": "^0.132.0"
+    "typecheck": "bun run --filter './packages/*' typecheck",
+    "test": "bun run --filter './packages/*' test",
+    "lint": "oxlint packages",
+    "format": "oxfmt packages",
+    "format:check": "oxfmt --check packages",
+    "check": "bun run typecheck && bun run lint && bun run format:check && bun run test"
   },
   "devDependencies": {
-    "@earendil-works/pi-ai": "0.75.4",
-    "@earendil-works/pi-coding-agent": "0.75.4",
-    "@earendil-works/pi-tui": "0.75.4",
     "@effect/language-service": "^0.85.1",
     "@effect/tsgo": "^0.5.2",
-    "@effect/vitest": "4.0.0-beta.59",
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^25.0.0",
-    "@types/semver": "^7.7.1",
     "@typescript/native-preview": "7.0.0-dev.20260512.1",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0",
-    "typebox": "1.1.38",
-    "typescript": "^6.0.3",
-    "vitest": "4.1.4"
-  },
-  "peerDependencies": {
-    "@earendil-works/pi-ai": "*",
-    "@earendil-works/pi-coding-agent": "*",
-    "@earendil-works/pi-tui": "*",
-    "typebox": "*"
+    "typescript": "^6.0.3"
   },
   "overrides": {
-    "fumadb": "file:./vendor/fumadb-0.3.0-382dcd65.tgz"
+    "fumadb": "file:./packages/pi-executor/vendor/fumadb-0.3.0-382dcd65.tgz"
   },
-  "pi": {
-    "extensions": [
-      "./src/index.ts"
-    ]
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
