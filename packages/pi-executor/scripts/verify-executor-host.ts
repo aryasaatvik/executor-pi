@@ -18,7 +18,7 @@ interface Overrides {
 
 interface PackageJson {
   readonly dependencies: Dependencies;
-  readonly overrides: Overrides;
+  readonly overrides?: Overrides;
 }
 
 const assert = (condition: unknown, message: string): void => {
@@ -51,18 +51,25 @@ try {
     await Effect.runPromise(host.close());
   }
 
+  const packageDir = process.cwd();
+  const rootDir = join(packageDir, "../..");
   const repoPackage = JSON.parse(
     readFileSync(join(process.cwd(), "package.json"), "utf8"),
   ) as PackageJson;
+  const rootPackage = JSON.parse(
+    readFileSync(join(rootDir, "package.json"), "utf8"),
+  ) as PackageJson;
   const fumadbDependency = repoPackage.dependencies.fumadb;
+  const rootFumadbOverride = rootPackage.overrides?.fumadb;
 
   assert(
     /^file:\.\/vendor\/fumadb-\d+\.\d+\.\d+-[0-9a-f]+\.tgz$/.test(fumadbDependency),
     "fumadb dependency must point at a short-SHA local tarball",
   );
   assert(
-    repoPackage.overrides.fumadb === fumadbDependency,
-    "fumadb override must match dependency",
+    rootFumadbOverride ===
+      `file:./packages/pi-executor/${fumadbDependency.slice("file:./".length)}`,
+    "root fumadb override must match executor dependency",
   );
 
   console.log("Executor host runtime verification passed.");
