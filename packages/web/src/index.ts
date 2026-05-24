@@ -12,7 +12,7 @@ export default function piWeb(pi: ExtensionAPI): void {
   pi.registerTool(makeWebFetchTool(runtime));
 
   pi.registerCommand("web", {
-    description: "Inspect and configure the pi-web extension",
+    description: "Inspect and configure the web extension",
     handler: async (args, ctx) => {
       const status = await runtime.runPromise(webCommand(args, ctx));
       ctx.ui.notify(status.summary, status.level);

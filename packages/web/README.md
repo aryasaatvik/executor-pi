@@ -1,4 +1,4 @@
-# pi-web
+# web
 
 Pi extension providing **`web_search`** and **`web_fetch`** with a pluggable **WebProvider** layer. It supports **Exa** via [`exa-js`](https://github.com/exa-labs/exa-js) and **Parallel** via [`parallel-web`](https://www.npmjs.com/package/parallel-web).
 
@@ -10,15 +10,15 @@ Pi extension providing **`web_search`** and **`web_fetch`** with a pluggable **W
 ## Install
 
 ```bash
-pi install /path/to/pi-extensions/packages/pi-web
+pi install /path/to/pi-extensions/packages/web
 ```
 
 ## Tools
 
-| Tool         | Description                                                                 |
-| ------------ | --------------------------------------------------------------------------- |
+| Tool         | Description                                                                                                                              |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `web_search` | Web search with highlights/excerpts (default 10 results). Supports auto provider routing, mode, domain/date filters, and Exa categories. |
-| `web_fetch`  | Page extraction for known URLs (default 3000 characters per page). Supports focused extraction via `target`. |
+| `web_fetch`  | Page extraction for known URLs (default 3000 characters per page). Supports focused extraction via `target`.                             |
 
 Use search to discover URLs; use fetch when highlights are not enough.
 
@@ -63,6 +63,6 @@ Settings files:
 ## Development
 
 ```bash
-cd packages/pi-web
+cd packages/web
 bun run check
 ```

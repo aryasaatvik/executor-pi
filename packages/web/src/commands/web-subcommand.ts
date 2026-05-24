@@ -11,7 +11,7 @@ export const { Help, Config, Status, Unknown } = Data.taggedEnum<WebSubcommand>(
 
 export const webCommandHelp = [
   "/web status - show provider configuration and auth status",
-  "/web config - adjust pi-web provider defaults and limits",
+  "/web config - adjust web provider defaults and limits",
   "/web help - show this help",
 ].join("\n");
 

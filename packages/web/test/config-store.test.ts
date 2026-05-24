@@ -9,11 +9,11 @@ import * as paths from "../src/config/paths.ts";
 import { loadPiWebSettings, saveGlobalPiWebSettings } from "../src/config/store.ts";
 import { DefaultWebSettings } from "../src/schemas/settings.ts";
 
-describe("pi-web config store", () => {
+describe("web config store", () => {
   let tempDir = "";
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), "pi-web-config-"));
+    tempDir = mkdtempSync(join(tmpdir(), "web-config-"));
     vi.spyOn(paths, "globalPiWebConfigPath").mockReturnValue(join(tempDir, "pi-web.json"));
     vi.spyOn(paths, "projectPiWebConfigPath").mockImplementation((cwd) =>
       join(cwd, ".pi", "pi-web.json"),

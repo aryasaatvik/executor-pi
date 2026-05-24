@@ -1,7 +1,7 @@
 {
-  "name": "pi-web",
+  "name": "@pi-ext/web",
   "version": "0.0.1",
-  "description": "Pi extension: vendor-agnostic web_search and web_fetch (Exa via exa-js)",
+  "description": "Pi extension: vendor-agnostic web_search and web_fetch",
   "keywords": [
     "exa",
     "pi-extension",
